@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>clustering</title>
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <style>
+        #cesiumContainer {
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="cesiumContainer"></div>
+    <script>
+        const viewer = new Cesium.Viewer("cesiumContainer")
+
+        const data = Cesium.GeoJsonDataSource.load("airports.geojson", {
+
+            markerSymbol: 'url(https://cdn4.iconfinder.com/data/icons/ionicons/512/icon-plane-512.png)',
+            markerSymbol:'none',
+            markerColor: Cesium.Color.BLUE,
+            markerSize: 0
+        }).then(
+            function (data) {
+                viewer.dataSources.add(data);
+                // data.show = false;
+                data.clustering.enabled = true;
+                data.clustering.pixelRange = 15;
+                data.clustering.minimumClusterSize = 3;
+
+                var airports = data.entities.values;
+                for (i = 0; i < airports.length; i++) {
+                    var airport = airports[i];
+                    // console.log(airport._position._value);
+
+                    viewer.entities.add({
+                        // position: Cesium.Cartesian3.fromDegrees(airport._position._value[x], airport._position._value[y], airport._position._value[z]),
+                        position: airport._position._value,
+                        // point: {
+                        //     pixelSize: 5
+                        // }
+                        billboard: {
+                            image: '568363.png', // Replace with the path to your billboard image
+                            width: 20,
+                            height: 20
+                        }
+                    });
+                }
+
+                const pinBuilder = new Cesium.PinBuilder();
+                const pin50 = pinBuilder
+                    .fromText("50+", Cesium.Color.RED, 40);
+                const pin40 = pinBuilder
+                    .fromText("40+", Cesium.Color.ORANGE, 40);
+                const pin30 = pinBuilder
+                    .fromText("30+", Cesium.Color.YELLOW, 40);
+                const pin20 = pinBuilder
+                    .fromText("20+", Cesium.Color.GREEN, 40);
+                const pin10 = pinBuilder
+                    .fromText("10+", Cesium.Color.BLUE, 40);
+
+                const singleDigitPins = new Array(8);
+                for (let i = 0; i < singleDigitPins.length; ++i) {
+                    singleDigitPins[i] = pinBuilder
+                        .fromText(`${i}`, Cesium.Color.VIOLET, 40);
+                }
+
+                data.clustering.clusterEvent.addEventListener(
+                    function (clusteredEntities, cluster) {
+                        cluster.label.show = false;
+                        cluster.billboard.show = true;
+                        // cluster.point.show = true;
+                        cluster.billboard.verticalOrigin =
+                            Cesium.VerticalOrigin.BOTTOM;
+
+                        if (clusteredEntities.length >= 50) {
+                            cluster.billboard.image = pin50;
+                        } else if (clusteredEntities.length >= 40) {
+                            cluster.billboard.image = pin40;
+                        } else if (clusteredEntities.length >= 30) {
+                            cluster.billboard.image = pin30;
+                        } else if (clusteredEntities.length >= 20) {
+                            cluster.billboard.image = pin20;
+                        } else if (clusteredEntities.length >= 10) {
+                            cluster.billboard.image = pin10;
+                        } else {
+                            cluster.billboard.image =
+                                singleDigitPins[clusteredEntities.length];
+                        }
+                    }
+                );
+
+            }
+        );
+
+    </script>
+</body>
+
+</html>

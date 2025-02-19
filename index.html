@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <!-- Include the CesiumJS JavaScript and CSS files -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+</head>
+
+<body>
+  <div id="cesiumContainer"></div>
+  <script type="module">
+    // Your access token can be found at: https://ion.cesium.com/tokens.
+    // Replace `your_access_token` with your Cesium ion access token.
+
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJkZDEwNGE5Zi1iNGM2LTQ5ODYtODAwYy03ZjVlNTg1YWQ3YWQiLCJpZCI6MTA0MjAxLCJpYXQiOjE2NjAwNDM2ODV9.4cGMEcV0JocBYzhWUmIL9IqV7T_mUGmcCzdZn7ir6sI';
+
+    // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
+    const viewer = new Cesium.Viewer("cesiumContainer");
+
+    const colorMap = {
+      'lt5': Cesium.Color.BLUE,
+      '5to25': Cesium.Color.CYAN,
+      '25to50': Cesium.Color.GREEN,
+      '50to100': Cesium.Color.YELLOW,
+      '100to1000': Cesium.Color.ORANGE,
+      'gt1000': Cesium.Color.RED
+    }
+
+    const getColor = pop => {
+      if (pop < 5000000) {
+        return colorMap['lt5'];
+      } else if (pop <= 25000000) {
+        return colorMap['5to25'];
+      } else if (pop <= 50000000) {
+        return colorMap['25to50'];
+      } else if (pop <= 100000000) {
+        return colorMap['50to100'];
+      } else if (pop <= 1000000000) {
+        return colorMap['100to1000'];
+      } else {
+        return colorMap['gt1000'];
+      }
+    }
+    const promise = Cesium.GeoJsonDataSource.load(
+      "./world-population.geo.json"
+    );
+    promise
+      .then(function (dataSource) {
+        viewer.dataSources.add(dataSource);
+        console.log(dataSource)
+        const entities = dataSource.entities.values;
+        console.log(dataSource)
+        const colorHash = {};
+        for (let i = 0; i < entities.length; i++) {
+          const entity = entities[i];
+          const name = entity.name;
+          entity.polygon.outline = false;
+          const population = entity.properties.POP2005.getValue(viewer.clock.currentTime);
+          viewer.entities.add({
+            polygon: {
+              hierarchy: entity.polygon.hierarchy,
+              material: getColor(population),
+            },
+          })
+        }
+      })
+      .catch(function (error) {
+        window.alert(error);
+      });
+  </script>
+  </div>
+</body>
+
+</html>

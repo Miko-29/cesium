@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>heatmap</title>
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css">
+</head>
+
+<body>
+    <div id="cesiumContainer" style="height: 100vh"></div>
+    <script>
+        const viewer = new Cesium.Viewer('cesiumContainer');
+        const heatmapData = [
+            [37.7749, -122.4194, 1],
+            // Add more data points as needed
+        ];
+
+        // Convert Leaflet coordinates to Cesium coordinates
+        const cartesianData = heatmapData.map(([lat, lon, intensity]) => {
+            const cartographic = Cesium.Cartographic.fromDegrees(lon, lat);
+            const cartesian = viewer.scene.globe.cartographicToCartesian(cartographic);
+            return [cartesian.x, cartesian.y, intensity];
+        });
+
+        // Create Leaflet Heatmap Layer
+        L.heatLayer(cartesianData).addTo(viewer.container);
+
+        viewer.camera.flyTo({
+            destination: Cesium.Cartesian3.fromDegrees(37.7749, -122.4194, 5000),
+        });
+    </script>
+</body>
+
+</html>

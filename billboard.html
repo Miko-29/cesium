@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="cesiumContainer"></div>
+    <script>
+        const viewer = new Cesium.Viewer("cesiumContainer", {
+            // terrain: Cesium.Terrain.fromWorldTerrain()
+        })
+        const position = Cesium.Cartesian3.fromDegrees(
+            85.3591748262076,
+            23.3555921640437,
+            0.0
+        ); viewer.entities.add({
+            position: position,
+            billboard: {
+                image: "red_marker.png",
+                // pixelOffset: new Cesium.Cartesian2(0, -50),
+                scale: 0.3,
+                // eyeOffset: new Cesium.Cartesian3(0.0, 0.0, -500.0),
+                scaleByDistance: new Cesium.NearFarScalar(1.5e2, 2.0, 1.5e7, 0.5),
+                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            },
+        });
+        viewer.camera.flyTo({
+            destination: Cesium.Cartesian3.fromDegrees(85.3591748262076, 23.3555921640437, 5000000),
+        });
+    </script>
+</body>
+
+</html>
